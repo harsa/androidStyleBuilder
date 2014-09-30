@@ -6,6 +6,88 @@ var states = ["normal","pressed"];
 
 
 
+var options = {
+	variants : {
+		default: {
+			normalTextColor : "#000000",
+			activeTextColor : "#ffffff",
+			startColor 	: "#ecebeb",
+			endColor 	: "#f3f3f3",
+			shadowColor : "#707070",
+			borderColor : "#707070",
+			activeColor : "#474646",
+			cornerRadius: "5dp",
+			borderWidth : "1dp",
+			shadowHeight: "4dp",
+			angle       : "0"
+		},
+		red: {
+			normalTextColor : "#000000",
+			activeTextColor : "#000000",
+			activeColor : "#4a1614",
+			startColor 	: "#fa5343",
+			endColor 	: "#f94444",
+			shadowColor : "#7e0d09",
+			borderColor : "#7e0d09",
+			cornerRadius: "5dp",
+			borderWidth : "3dp",
+			shadowHeight: "4dp",
+			angle       : "0"
+		},
+		green: {
+			normalTextColor : "#",
+			activeTextColor : "#",			
+			startColor 	: "#00bf53",
+			endColor 	: "#00c062",
+			shadowColor : "#277d53",
+			borderColor : "#277d53",
+			activeColor : "#00391c",
+			cornerRadius: "5dp",
+			borderWidth : "3dp",
+			shadowHeight: "4dp",
+			angle       : "0"
+		}
+	}
+	
+}
+
+function getValue(valueName, variant, dpi, state){
+
+	//Selected variant
+	var cVariant = options.variants[variant];
+	var ret = cVariant[valueName];
+
+	switch (valueName){
+		case "shadowHeight":
+			if (state == "pressed"){
+				ret = "0dp";
+			}
+		break;
+		case "startColor":
+		case "endColor":
+			if (state == "pressed"){
+				ret = cVariant.activeColor;
+			}
+			break;
+
+	}
+
+	
+
+	return ret;
+/*
+	switch (state){
+		case "pressed":
+
+			break;
+		default:
+
+		break;
+
+	}
+	*/
+
+}
 
 
 var startColor 	= "#ecebeb";
@@ -25,7 +107,7 @@ var fs = require('fs');
 function write_file(directory, fileName, contents){
 	console.log("writing: " + directory + "/" + fileName);
 	fullFileName = directory + "/" + fileName;
-/*
+
 	fs.writeFile(fullFileName, contents, function(err) {
 	    if(err) {
 	        console.log(err);
@@ -33,8 +115,8 @@ function write_file(directory, fileName, contents){
 	        console.log("saved: " + fullFileName);
 	    }
 	});
-	*/
-	console.log(contents); 	
+		
+	//console.log(contents); 	
 }
 
 
@@ -43,7 +125,7 @@ function print_drawable(variant, dpi, state){
 	var xml = builder.create('layer-list');
 
 
-		xml =  xml + xml.att("xmlns:android",'http://schemas.android.com/apk/res/android')
+		xml = xml.att("xmlns:android",'http://schemas.android.com/apk/res/android')
 		.ele("item")
 			.ele("shape")
 				.att("android:shape", "rectangle")
@@ -51,10 +133,10 @@ function print_drawable(variant, dpi, state){
 					.att("android:radius", cornerRadius)
 				.up()
 				.ele("solid")
-					.att("android:color", "#707070")
+					.att("android:color", getValue("shadowColor", variant, dpi, state))
 
 		.up().up().up().ele("item")
-			.att("android:bottom", shadowHeight)
+			.att("android:bottom", getValue("shadowHeight", variant, dpi, state))
 			.ele("shape")
 				.att("android:shape", "rectangle")
 
@@ -62,13 +144,13 @@ function print_drawable(variant, dpi, state){
 					.att("android:radius", cornerRadius)
 
 				.up().ele("gradient")
-					.att("android:startColor", startColor)
-					.att("android:endColor", endColor)
+					.att("android:startColor", getValue("startColor", variant, dpi, state))
+					.att("android:endColor", getValue("endColor", variant, dpi, state))
 					.att("android:angle", angle)
 				.up().ele("stroke")
-					.att("android:width", borderWidth)
-					.att("android:color", borderColor)
-	  .end({ pretty: false, offset: 0});
+					.att("android:width", getValue("borderWidth", variant, dpi, state))
+					.att("android:color", getValue("borderColor", variant, dpi, state))
+	  .end({ pretty: true});
 	  //console.log("printing " + variant + " " + dpi + " " + state );
 	  //console.log("drawable" + (dpi.length > 0 ? "_" + dpi : "")   + "/" + name + "_" + variant + "_" + state + ".xml")
 	  var dirName = "drawable" + (dpi.length > 0 ? "-" + dpi : "");
