@@ -103,6 +103,8 @@ var textColor = "";
 var textShadowColor = "";
 
 var fs = require('fs');
+var builder = require('xmlbuilder');
+
 
 function write_file(directory, fileName, contents){
 	console.log("writing: " + directory + "/" + fileName);
@@ -112,7 +114,7 @@ function write_file(directory, fileName, contents){
 	    if(err) {
 	        console.log(err);
 	    } else {
-	        console.log("saved: " + fullFileName);
+	        console.log("saved.");
 	    }
 	});
 		
@@ -120,8 +122,24 @@ function write_file(directory, fileName, contents){
 }
 
 
+function print_selector(variant){
+	//console.log("printing selector for variant " + variant);
+	var xml = builder.create("selector");
+	xml = xml.att("xmlns:android",'http://schemas.android.com/apk/res/android')
+		.ele("item")
+			.att("android:drawable", "@drawable/" + name + "_" + variant + "_pressed")
+			.att("android:state_pressed", "true")
+		.up().ele("item")
+			.att("android:drawable", "@drawable/" + name + "_" + variant + "_normal")
+		.end({pretty: true})
+
+	var dirName = "drawable"
+	write_file(dirName, "selector_" + name + "_" + variant + ".xml", xml);
+
+}
+
 function print_drawable(variant, dpi, state){
-	var builder = require('xmlbuilder');
+	
 	var xml = builder.create('layer-list');
 
 
@@ -157,6 +175,8 @@ function print_drawable(variant, dpi, state){
 	  write_file(dirName, name + "_" + variant + "_" + state + ".xml", xml);
 	//console.log(xml);
 }
+
+
 var selectedVariants, selectedDpis, selectedStates;
 	selectedVariants = variants;
 	//selectedDpis = dpi.slice(0,1);
@@ -180,3 +200,10 @@ for (var i  = selectedVariants.length - 1; i >= 0; i--) {
 		}
 	}
 }
+
+selectedVariants.forEach(function(variant){
+	print_selector(variant)
+})
+
+
+
