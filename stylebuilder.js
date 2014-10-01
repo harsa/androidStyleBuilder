@@ -1,5 +1,4 @@
-
-var name ="button_huge";
+var names = ['button_normal','button_huge', 'button_huge_buttonbar']
 var variants = ['default', "red", "green"];
 var dpi = ["",'mdpi', "hdpi", "xhdpi", "xxhdpi"];
 var states = ["normal","pressed"];
@@ -17,7 +16,7 @@ var options = {
 			borderColor : "#707070",
 			activeColor : "#474646",
 			cornerRadius: "5dp",
-			borderWidth : "1dp",
+			borderWidth : "3dp",
 			shadowHeight: "4dp",
 			angle       : "0"
 		},
@@ -51,17 +50,29 @@ var options = {
 	
 }
 
-function getValue(valueName, variant, dpi, state){
+function getValue(valueName, name, variant, dpi, state){
 
 	//Selected variant
 	var cVariant = options.variants[variant];
 	var ret = cVariant[valueName];
 
 	switch (valueName){
-		case "shadowHeight":
-			if (state == "pressed"){
+		case "cornerRadius":
+			if (name == "button_huge_buttonbar"){
 				ret = "0dp";
 			}
+
+			break;
+		case "shadowHeight":
+		
+			if (state == "pressed"){
+				ret = "0dp";
+			} else if (name == "button_huge"){
+				ret = "10dp";	
+			} else if (name == "button_normal"){
+				ret = "4dp";
+			}
+
 		break;
 		case "startColor":
 		case "endColor":
@@ -71,8 +82,6 @@ function getValue(valueName, variant, dpi, state){
 			break;
 
 	}
-
-	
 
 	return ret;
 /*
@@ -122,7 +131,7 @@ function write_file(directory, fileName, contents){
 }
 
 
-function print_selector(variant){
+function print_selector(name, variant){
 	//console.log("printing selector for variant " + variant);
 	var xml = builder.create("selector");
 	xml = xml.att("xmlns:android",'http://schemas.android.com/apk/res/android')
@@ -138,7 +147,7 @@ function print_selector(variant){
 
 }
 
-function print_drawable(variant, dpi, state){
+function print_drawable(variant, name, dpi, state){
 	
 	var xml = builder.create('layer-list');
 
@@ -148,26 +157,26 @@ function print_drawable(variant, dpi, state){
 			.ele("shape")
 				.att("android:shape", "rectangle")
 				.ele("corners")
-					.att("android:radius", cornerRadius)
+					.att("android:radius", getValue("cornerRadius", name, variant, dpi, state))
 				.up()
 				.ele("solid")
-					.att("android:color", getValue("shadowColor", variant, dpi, state))
+					.att("android:color", getValue("shadowColor", name, variant, dpi, state))
 
 		.up().up().up().ele("item")
-			.att("android:bottom", getValue("shadowHeight", variant, dpi, state))
+			.att("android:bottom", getValue("shadowHeight", name, variant, dpi, state))
 			.ele("shape")
 				.att("android:shape", "rectangle")
 
 				.ele("corners")
-					.att("android:radius", cornerRadius)
+					.att("android:radius", getValue("cornerRadius", name, variant, dpi, state))
 
 				.up().ele("gradient")
-					.att("android:startColor", getValue("startColor", variant, dpi, state))
-					.att("android:endColor", getValue("endColor", variant, dpi, state))
+					.att("android:startColor", getValue("startColor", name, variant, dpi, state))
+					.att("android:endColor", getValue("endColor", name, variant, dpi, state))
 					.att("android:angle", angle)
 				.up().ele("stroke")
-					.att("android:width", getValue("borderWidth", variant, dpi, state))
-					.att("android:color", getValue("borderColor", variant, dpi, state))
+					.att("android:width", getValue("borderWidth", name, variant, dpi, state))
+					.att("android:color", getValue("borderColor", name, variant, dpi, state))
 	  .end({ pretty: true});
 	  //console.log("printing " + variant + " " + dpi + " " + state );
 	  //console.log("drawable" + (dpi.length > 0 ? "_" + dpi : "")   + "/" + name + "_" + variant + "_" + state + ".xml")
@@ -177,7 +186,8 @@ function print_drawable(variant, dpi, state){
 }
 
 
-var selectedVariants, selectedDpis, selectedStates;
+var selectedNames, selectedVariants, selectedDpis, selectedStates;
+	selectedNames = names;
 	selectedVariants = variants;
 	//selectedDpis = dpi.slice(0,1);
 	selectedDpis = dpi.slice(1,2);
@@ -196,13 +206,21 @@ for (var i  = selectedVariants.length - 1; i >= 0; i--) {
 
 			selectedState = states[k];
 
-			print_drawable(selectedVariant, selectedDpi, selectedState);
+			selectedNames.forEach(function(name){
+				print_drawable(selectedVariant, name, selectedDpi, selectedState);				
+			})
+
+			//print_drawable(selectedVariant, names[0], selectedDpi, selectedState);
+			//print_drawable(selectedVariant, names[0], selectedDpi, selectedState);
 		}
 	}
 }
 
 selectedVariants.forEach(function(variant){
-	print_selector(variant)
+	//TODO: include names
+	print_selector(names[0], variant)
+	print_selector(names[1], variant)
+	print_selector(names[2], variant)
 })
 
 
